@@ -33,6 +33,7 @@ import {
 import { refreshStartupDiscoveryForRoute } from '../integrations/discoveryService.js'
 import {
   getProviderPresetUiMetadata,
+  getRouteDescriptor,
   normalizeXiaomiMimoBaseUrl,
   routeSupportsApiFormatSelection,
   routeSupportsAuthHeaders,
@@ -80,6 +81,19 @@ type ProfileCompatibilityMode =
   | 'bedrock'
   | 'vertex'
   | 'openai'
+
+// Anthropic-protocol routes can authenticate via either x-api-key
+// (ANTHROPIC_API_KEY) or Authorization: Bearer (ANTHROPIC_AUTH_TOKEN).
+// A descriptor signals Bearer auth by listing ANTHROPIC_AUTH_TOKEN as its
+// primary credential env var.
+function getAnthropicCredentialEnvVar(
+  routeId: string,
+): 'ANTHROPIC_API_KEY' | 'ANTHROPIC_AUTH_TOKEN' {
+  const primary = getRouteDescriptor(routeId)?.setup.credentialEnvVars?.[0]
+  return primary === 'ANTHROPIC_AUTH_TOKEN'
+    ? 'ANTHROPIC_AUTH_TOKEN'
+    : 'ANTHROPIC_API_KEY'
+}
 
 function resolveProfileCompatibility(provider: string): {
   route: ResolvedProfileRoute
@@ -421,7 +435,7 @@ function isProcessEnvAlignedWithProfile(
   },
 ): boolean {
   const includeApiKey = options?.includeApiKey ?? true
-  const { compatibilityMode } = resolveProfileCompatibility(profile.provider)
+  const { route, compatibilityMode } = resolveProfileCompatibility(profile.provider)
 
   if (processEnv[PROFILE_ENV_APPLIED_FLAG] !== '1') {
     return false
@@ -432,12 +446,13 @@ function isProcessEnvAlignedWithProfile(
   }
 
   if (compatibilityMode === 'anthropic') {
+    const credentialEnvVar = getAnthropicCredentialEnvVar(route.routeId)
     return (
       !hasProviderSelectionFlags(processEnv) &&
       sameOptionalEnvValue(processEnv.ANTHROPIC_BASE_URL, profile.baseUrl) &&
       sameOptionalEnvValue(processEnv.ANTHROPIC_MODEL, getPrimaryModel(profile.model)) &&
       (!includeApiKey ||
-        sameOptionalEnvValue(processEnv.ANTHROPIC_API_KEY, profile.apiKey))
+        sameOptionalEnvValue(processEnv[credentialEnvVar], profile.apiKey))
     )
   }
 
@@ -598,7 +613,9 @@ export function applyProviderProfileToProcessEnv(profile: ProviderProfile): void
       profileEnv = {
         ANTHROPIC_BASE_URL: profile.baseUrl,
         ANTHROPIC_MODEL: primaryModel,
-        ...(profile.apiKey ? { ANTHROPIC_API_KEY: profile.apiKey } : {}),
+        ...(profile.apiKey
+          ? { [getAnthropicCredentialEnvVar(route.routeId)]: profile.apiKey }
+          : {}),
       }
     }
   } else if (compatibilityMode === 'mistral') {
@@ -1023,7 +1040,10 @@ function buildStartupProfileFromActiveProfile(
           ANTHROPIC_BASE_URL: activeProfile.baseUrl,
           ANTHROPIC_MODEL: getPrimaryModel(activeProfile.model),
           ...(activeProfile.apiKey
-            ? { ANTHROPIC_API_KEY: activeProfile.apiKey }
+            ? {
+                [getAnthropicCredentialEnvVar(route.routeId)]:
+                  activeProfile.apiKey,
+              }
             : {}),
         }),
       }

@@ -2,6 +2,7 @@
 // Do not edit it by hand; update the descriptor modules and regenerate instead.
 
 import type { AnthropicProxyDescriptor, BrandDescriptor, GatewayDescriptor, ModelDescriptor, ProviderPresetManifestEntry, VendorDescriptor } from '../descriptors.js'
+import vendorAliyunTokenplan from '../vendors/aliyun-tokenplan.js'
 import vendorAnthropic from '../vendors/anthropic.js'
 import vendorBankr from '../vendors/bankr.js'
 import vendorDeepseek from '../vendors/deepseek.js'
@@ -60,7 +61,7 @@ import modelQwen from '../models/qwen.js'
 import modelXai from '../models/xai.js'
 import modelXiaomiMimo from '../models/xiaomi-mimo.js'
 
-export const VENDOR_DESCRIPTORS = [vendorAnthropic, vendorBankr, vendorDeepseek, vendorGemini, vendorMinimax, vendorMoonshot, vendorOpenai, vendorVenice, vendorXai, vendorXiaomiMimo, vendorZai] as const satisfies readonly VendorDescriptor[]
+export const VENDOR_DESCRIPTORS = [vendorAliyunTokenplan, vendorAnthropic, vendorBankr, vendorDeepseek, vendorGemini, vendorMinimax, vendorMoonshot, vendorOpenai, vendorVenice, vendorXai, vendorXiaomiMimo, vendorZai] as const satisfies readonly VendorDescriptor[]
 export const GATEWAY_DESCRIPTORS = [gatewayAtomicChat, gatewayAzureOpenai, gatewayBedrock, gatewayCustom, gatewayDashscopeCn, gatewayDashscopeIntl, gatewayGithub, gatewayGitlawbOpengateway, gatewayGroq, gatewayHicap, gatewayKimiCode, gatewayLmstudio, gatewayMistral, gatewayNvidiaNim, gatewayOllama, gatewayOpenrouter, gatewayTogether, gatewayVertex] as const satisfies readonly GatewayDescriptor[]
 export const ANTHROPIC_PROXY_DESCRIPTORS = [] as const satisfies readonly AnthropicProxyDescriptor[]
 export const BRAND_DESCRIPTORS = [brandClaude, brandDeepseek, brandGemini, brandGlm, brandGpt, brandKimi, brandLlama, brandMinimax, brandMistral, brandNemotron, brandOpenaiCompatibleAlias, brandQwen, brandXai, brandXiaomiMimo] as const satisfies readonly BrandDescriptor[]
@@ -123,6 +124,23 @@ export const PROVIDER_PRESET_MANIFEST = [
     "description": "Alibaba DashScope International endpoint",
     "apiKeyEnvVars": [
       "DASHSCOPE_API_KEY"
+    ]
+  },
+  {
+    "preset": "aliyun-tokenplan",
+    "routeKind": "vendor",
+    "routeId": "aliyun-tokenplan",
+    "vendorId": "aliyun-tokenplan",
+    "description": "Aliyun Bailian TokenPlan — Anthropic-compatible (Bearer auth)",
+    "label": "Aliyun Bailian TokenPlan",
+    "apiKeyEnvVars": [
+      "ANTHROPIC_AUTH_TOKEN"
+    ],
+    "baseUrlEnvVars": [
+      "ANTHROPIC_BASE_URL"
+    ],
+    "modelEnvVars": [
+      "ANTHROPIC_MODEL"
     ]
   },
   {
@@ -399,6 +417,7 @@ export const ORDERED_PROVIDER_PRESETS = [
   "anthropic",
   "dashscope-cn",
   "dashscope-intl",
+  "aliyun-tokenplan",
   "azure-openai",
   "bankr",
   "deepseek",

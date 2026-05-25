@@ -41,6 +41,7 @@ const EXPECTED_PRESETS = [
   'bankr',
   'atomic-chat',
   'gitlawb-opengateway',
+  'aliyun-tokenplan',
 ] as const satisfies readonly ProviderPreset[]
 
 describe('compatibility mappings', () => {

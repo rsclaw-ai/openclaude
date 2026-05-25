@@ -1827,7 +1827,9 @@ export function ProviderManager({ mode, onDone }: Props): React.ReactNode {
     if (canUseCodexOAuth) {
       // Insert after DeepSeek so Codex OAuth keeps its established position
       // in the picker even with Gitlawb Opengateway pinned at the top.
-      options.splice(7, 0, {
+      const deepseekIndex = options.findIndex(o => o.value === 'deepseek')
+      const codexInsertAt = deepseekIndex >= 0 ? deepseekIndex + 1 : 7
+      options.splice(codexInsertAt, 0, {
         value: 'codex-oauth',
         label: (
           <Text>
@@ -1843,7 +1845,9 @@ export function ProviderManager({ mode, onDone }: Props): React.ReactNode {
     if (canUseXaiOAuth) {
       // Place xAI OAuth directly under Codex OAuth so both browser-sign-in
       // options group together visually.
-      options.splice(canUseCodexOAuth ? 8 : 7, 0, {
+      const deepseekIdx = options.findIndex(o => o.value === 'deepseek')
+      const baseInsert = deepseekIdx >= 0 ? deepseekIdx + 1 : 7
+      options.splice(canUseCodexOAuth ? baseInsert + 1 : baseInsert, 0, {
         value: 'xai-oauth',
         label: 'xAI OAuth (Grok)',
         description:
