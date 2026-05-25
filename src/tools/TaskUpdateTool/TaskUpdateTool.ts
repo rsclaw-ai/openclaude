@@ -166,15 +166,27 @@ export const TaskUpdateTool = buildTool({
       owner?: string
       metadata?: Record<string, unknown>
     } = {}
-    if (subject !== undefined && subject !== existingTask.subject) {
+    if (
+      subject !== undefined &&
+      subject !== '' &&
+      subject !== existingTask.subject
+    ) {
       updates.subject = subject
       updatedFields.push('subject')
     }
-    if (description !== undefined && description !== existingTask.description) {
+    if (
+      description !== undefined &&
+      description !== '' &&
+      description !== existingTask.description
+    ) {
       updates.description = description
       updatedFields.push('description')
     }
-    if (activeForm !== undefined && activeForm !== existingTask.activeForm) {
+    if (
+      activeForm !== undefined &&
+      activeForm !== '' &&
+      activeForm !== existingTask.activeForm
+    ) {
       updates.activeForm = activeForm
       updatedFields.push('activeForm')
     }

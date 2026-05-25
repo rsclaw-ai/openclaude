@@ -278,11 +278,12 @@ function TaskItem(t0) {
   }
   const ownerWidth = t2;
   const maxSubjectWidth = Math.max(15, columns - 15 - ownerWidth);
+  const subjectText = task.subject || task.activeForm || task.description || '(untitled)';
   let t3;
-  if ($[5] !== maxSubjectWidth || $[6] !== task.subject) {
-    t3 = truncateToWidth(task.subject, maxSubjectWidth);
+  if ($[5] !== maxSubjectWidth || $[6] !== subjectText) {
+    t3 = truncateToWidth(subjectText, maxSubjectWidth);
     $[5] = maxSubjectWidth;
-    $[6] = task.subject;
+    $[6] = subjectText;
     $[7] = t3;
   } else {
     t3 = $[7];
