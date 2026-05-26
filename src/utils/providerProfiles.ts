@@ -110,7 +110,10 @@ function resolveProfileCompatibility(provider: string): {
   if (route.gatewayId === 'vertex') {
     return { route, compatibilityMode: 'vertex' }
   }
-  if (route.vendorId === 'anthropic') {
+  if (
+    route.vendorId === 'anthropic' ||
+    getRouteDescriptor(route.routeId)?.classification === 'anthropic'
+  ) {
     return { route, compatibilityMode: 'anthropic' }
   }
   if (route.vendorId === 'minimax') {

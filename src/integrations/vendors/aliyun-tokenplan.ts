@@ -5,7 +5,7 @@ export default defineVendor({
   label: 'Aliyun Bailian TokenPlan',
   classification: 'anthropic',
   defaultBaseUrl: 'https://token-plan.cn-beijing.maas.aliyuncs.com/apps/anthropic',
-  defaultModel: 'claude-sonnet-4-6',
+  defaultModel: 'qwen3.7-max',
   requiredEnvVars: ['ANTHROPIC_AUTH_TOKEN'],
   setup: {
     requiresAuth: true,

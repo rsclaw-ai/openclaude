@@ -18,6 +18,7 @@ import {
   getAllGateways,
   getAllVendors,
   getGateway,
+  getRouteDescriptor,
   getVendor,
   resolveProfileRoute,
 } from '../integrations/index.js'
@@ -218,6 +219,19 @@ export function applyProviderFlag(
 
   const model = parseModelFlag(args)
   const { defaultBaseUrl, defaultModel } = getRouteDefaults(provider)
+
+  const route = resolveProfileRoute(provider)
+  const classification = getRouteDescriptor(route.routeId)?.classification
+  if (provider !== 'anthropic' && classification === 'anthropic') {
+    if (defaultBaseUrl) {
+      process.env.ANTHROPIC_BASE_URL ??= defaultBaseUrl
+    }
+    if (defaultModel) {
+      process.env.ANTHROPIC_MODEL ??= defaultModel
+    }
+    if (model) process.env.ANTHROPIC_MODEL = model
+    return {}
+  }
 
   switch (provider) {
     case 'anthropic':
