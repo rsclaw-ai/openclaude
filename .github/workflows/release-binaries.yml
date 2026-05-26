@@ -31,11 +31,6 @@ jobs:
             archive: tar.gz
             binary: openclaude
             smoke: true
-          - target: bun-linux-x64-musl
-            os: ubuntu-24.04
-            archive: tar.gz
-            binary: openclaude
-            smoke: false
           - target: bun-darwin-x64
             os: macos-14
             archive: tar.gz
@@ -48,6 +43,11 @@ jobs:
             smoke: true
           - target: bun-windows-x64
             os: windows-latest
+            archive: zip
+            binary: openclaude.exe
+            smoke: true
+          - target: bun-windows-arm64
+            os: windows-11-arm
             archive: zip
             binary: openclaude.exe
             smoke: true

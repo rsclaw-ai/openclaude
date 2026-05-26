@@ -9,6 +9,8 @@
  */
 
 import { readFileSync, copyFileSync, mkdirSync } from 'fs'
+import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { noTelemetryPlugin } from './no-telemetry-plugin'
 import { CLI_EXTERNALS, SDK_EXTERNALS } from './externals.js'
 
@@ -876,10 +878,10 @@ if (sdkResult?.success) {
 }
 
 // ── Copy proto files for gRPC server ────────────────────────────────────
-const protoDest = new URL('../proto/', import.meta.url).pathname;
-const protoSrc = new URL('../src/proto/openclaude.proto', import.meta.url).pathname;
+const protoDest = fileURLToPath(new URL('../proto/', import.meta.url));
+const protoSrc = fileURLToPath(new URL('../src/proto/openclaude.proto', import.meta.url));
 try { mkdirSync(protoDest, { recursive: true }); } catch {}
-copyFileSync(protoSrc, protoDest + 'openclaude.proto');
+copyFileSync(protoSrc, join(protoDest, 'openclaude.proto'));
 console.log('✓ Copied proto/openclaude.proto for gRPC server');
 
 // ── Validate external lists ──────────────────────────────────────────────
