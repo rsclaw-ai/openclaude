@@ -3951,6 +3951,36 @@ async function run(): Promise<CommanderCommand> {
     await mcpResetChoicesHandler();
   });
 
+  // openclaude grpc — headless gRPC server for programmatic access
+  program.command('grpc').description('Start the OpenClaude gRPC server for programmatic agent access').option('--port <number>', 'gRPC port', '50051').option('--host <string>', 'Bind address', 'localhost').action(async (opts: {
+    port: string;
+    host: string;
+  }) => {
+    const { GrpcServer } = await import('./grpc/server.js');
+    const { buildStartupEnvFromProfile, applyProfileEnvToProcessEnv } = await import('./utils/providerProfile.js');
+    const { getProviderValidationError, validateProviderEnvOrExit } = await import('./utils/providerValidation.js');
+    const startupEnv = await buildStartupEnvFromProfile({ processEnv: process.env });
+    if (startupEnv !== process.env) {
+      const startupProfileError = await getProviderValidationError(startupEnv);
+      if (startupProfileError) {
+        process.stderr.write(`Warning: ignoring saved provider profile. ${startupProfileError}\n`);
+      } else {
+        applyProfileEnvToProcessEnv(process.env, startupEnv);
+      }
+    }
+    await validateProviderEnvOrExit();
+    const port = parseInt(opts.port, 10);
+    const host = opts.host;
+    const server = new GrpcServer();
+    server.start(port, host);
+    process.stderr.write(`OpenClaude gRPC server listening on ${host}:${port}\n`);
+    await new Promise<void>((resolve) => {
+      const onSignal = () => { resolve(); };
+      process.once('SIGINT', onSignal);
+      process.once('SIGTERM', onSignal);
+    });
+  });
+
   // claude server
   if (feature('DIRECT_CONNECT')) {
     program.command('server').description('Start an OpenClaude session server').option('--port <number>', 'HTTP port', '0').option('--host <string>', 'Bind address', '0.0.0.0').option('--auth-token <token>', 'Bearer token for auth').option('--unix <path>', 'Listen on a unix domain socket').option('--workspace <dir>', 'Default working directory for sessions that do not specify cwd').option('--idle-timeout <ms>', 'Idle timeout for detached sessions in ms (0 = never expire)', '600000').option('--max-sessions <n>', 'Maximum concurrent sessions (0 = unlimited)', '32').action(async (opts: {

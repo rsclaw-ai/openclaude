@@ -8,7 +8,7 @@
  * - src/ path aliases
  */
 
-import { readFileSync } from 'fs'
+import { readFileSync, copyFileSync, mkdirSync } from 'fs'
 import { noTelemetryPlugin } from './no-telemetry-plugin'
 import { CLI_EXTERNALS, SDK_EXTERNALS } from './externals.js'
 
@@ -874,6 +874,13 @@ if (sdkResult?.success) {
     console.log(`✓ SDK bundle: no React/Ink leakage detected`)
   }
 }
+
+// ── Copy proto files for gRPC server ────────────────────────────────────
+const protoDest = new URL('../proto/', import.meta.url).pathname;
+const protoSrc = new URL('../src/proto/openclaude.proto', import.meta.url).pathname;
+try { mkdirSync(protoDest, { recursive: true }); } catch {}
+copyFileSync(protoSrc, protoDest + 'openclaude.proto');
+console.log('✓ Copied proto/openclaude.proto for gRPC server');
 
 // ── Validate external lists ──────────────────────────────────────────────
 if (result?.success && sdkResult?.success) {
