@@ -99,18 +99,43 @@ jobs:
           chmod +x artifacts/${{ matrix.binary }} || true
           artifacts/${{ matrix.binary }} --version
 
+      - name: Stage license + attribution files
+        shell: bash
+        run: |
+          # MIT/Apache require the license + (where present) NOTICE to
+          # accompany every binary copy.
+          cp LICENSE artifacts/LICENSE
+          if [ -f NOTICE ]; then cp NOTICE artifacts/NOTICE; fi
+          cat > artifacts/SOURCE.txt <<EOF
+          This binary is built from rsclaw-ai/openclaude.
+          openclaude is an open-source client derived from Anthropic's Claude Code CLI;
+          see NOTICE for derivation details.
+
+          Fork:    https://github.com/rsclaw-ai/openclaude
+          Version: ${{ steps.ver.outputs.version }}
+          Target:  ${{ matrix.target }}
+          Commit:  ${{ github.sha }}
+
+          This is a third-party build. No affiliation with Anthropic.
+          EOF
+
       - name: Package (tar.gz)
         if: matrix.archive == 'tar.gz'
         shell: bash
         run: |
           cd artifacts
-          tar czf "../openclaude-${{ steps.ver.outputs.version }}-${{ matrix.target }}.tar.gz" "${{ matrix.binary }}"
+          extra=""
+          [ -f NOTICE ] && extra="NOTICE"
+          tar czf "../openclaude-${{ steps.ver.outputs.version }}-${{ matrix.target }}.tar.gz" \
+            "${{ matrix.binary }}" LICENSE SOURCE.txt $extra
 
       - name: Package (zip)
         if: matrix.archive == 'zip'
         shell: pwsh
         run: |
-          Compress-Archive -Path "artifacts/${{ matrix.binary }}" `
+          $files = @("artifacts/${{ matrix.binary }}", "artifacts/LICENSE", "artifacts/SOURCE.txt")
+          if (Test-Path "artifacts/NOTICE") { $files += "artifacts/NOTICE" }
+          Compress-Archive -Path $files `
             -DestinationPath "openclaude-${{ steps.ver.outputs.version }}-${{ matrix.target }}.zip"
 
       - name: Upload artifact
