@@ -309,6 +309,27 @@ export function convertAnthropicMessagesToResponsesInput(
   )
 }
 
+const RESPONSES_INPUT_LIMIT = 950
+
+export function trimResponsesInput(items: ResponsesInputItem[]): ResponsesInputItem[] {
+  if (items.length <= RESPONSES_INPUT_LIMIT) return items
+
+  const trimmed = items.slice(items.length - RESPONSES_INPUT_LIMIT)
+
+  const callIds = new Set(
+    trimmed
+      .filter((i): i is ResponsesInputItem & { type: 'function_call' } => i.type === 'function_call')
+      .map(i => (i as { call_id?: string }).call_id),
+  )
+
+  return trimmed.filter(item => {
+    if (item.type === 'function_call_output') {
+      return callIds.has((item as { call_id?: string }).call_id)
+    }
+    return true
+  })
+}
+
 /**
  * Codex Responses strict mode requires every schema node to declare a `type`.
  * MCP tools sometimes register properties with no `type` (e.g. a generic
@@ -549,7 +570,7 @@ export async function performCodexRequest(options: {
     }>,
     options.request.resolvedModel,
   )
-  const input = convertAnthropicMessagesToResponsesInput(compressedMessages)
+  const input = trimResponsesInput(convertAnthropicMessagesToResponsesInput(compressedMessages))
   const body: Record<string, unknown> = {
     model: options.request.resolvedModel,
     input: input.length > 0

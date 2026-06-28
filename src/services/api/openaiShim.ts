@@ -53,6 +53,7 @@ import {
   convertCodexResponseToAnthropicMessage,
   convertToolsToResponsesTools,
   performCodexRequest,
+  trimResponsesInput,
   type AnthropicStreamEvent,
   type AnthropicUsage,
   type ShimCreateParams,
@@ -1913,13 +1914,13 @@ class OpenAIShimMessages {
     const buildResponsesBody = (): Record<string, unknown> => {
       const responsesBody: Record<string, unknown> = {
         model: request.resolvedModel,
-        input: convertAnthropicMessagesToResponsesInput(
+        input: trimResponsesInput(convertAnthropicMessagesToResponsesInput(
           params.messages as Array<{
             role?: string
             message?: { role?: string; content?: unknown }
             content?: unknown
           }>,
-        ),
+        )),
         stream: params.stream ?? false,
         store: false,
       }
